@@ -1,0 +1,26 @@
+[master]
+host = "0.0.0.0"
+port = 8086
+dashboard_url = "localhost:8088"
+check_recommend_period = "1m"
+
+[server]
+host = "0.0.0.0"
+port = 8087
+
+[recommend]
+cache_size = 200
+
+[recommend.data_source]
+positive_feedback_types = ["view", "like", "purchase"]
+
+[recommend.collaborative]
+type = "none"
+fit_epoch = 50
+fit_period = "5m"
+
+[recommend."item-to-item"]
+type = "tags"
+
+[recommend.fallback]
+recommenders = ["latest"]

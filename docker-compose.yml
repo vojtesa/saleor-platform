@@ -4,6 +4,8 @@ services:
     ports:
       - 8000:8000
     restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - saleor-backend-tier
     stdin_open: true
@@ -54,7 +56,7 @@ services:
 
   worker:
     image: ghcr.io/saleor/saleor:3.23
-    command: celery -A saleor --app=saleor.celeryconf:app worker --loglevel=info -B
+    command: /app/worker-entrypoint.sh
     restart: unless-stopped
     networks:
       - saleor-backend-tier
@@ -67,6 +69,8 @@ services:
     volumes:
       # shared volume between worker and api for media
       - saleor-media:/app/media
+      - ./worker-entrypoint.sh:/app/worker-entrypoint.sh:ro
+      - ./promotion-watchdog.sh:/app/promotion-watchdog.sh:ro
 
   jaeger:
     image: jaegertracing/jaeger
@@ -90,12 +94,53 @@ services:
     networks:
       - saleor-backend-tier
 
+  dynamodb:
+    image: amazon/dynamodb-local:latest
+    ports:
+      - 8005:8000
+    restart: unless-stopped
+    networks:
+      - saleor-backend-tier
+    command: "-jar DynamoDBLocal.jar -sharedDb"
+    volumes:
+      - saleor-dynamodb:/home/dynamodblocal/data
+
+  gorse:
+    image: zhenghaoz/gorse-in-one:latest
+    ports:
+      - 8088:8088
+    restart: unless-stopped
+    networks:
+      - saleor-backend-tier
+    volumes:
+      - gorse-data:/gorse_data
+      - ./gorse-config.toml:/etc/gorse/config.toml
+    environment:
+      GORSE_CACHE_STORE: postgres://saleor:saleor@db:5432/gorse?sslmode=disable
+      GORSE_DATA_STORE: postgres://saleor:saleor@db:5432/gorse?sslmode=disable
+    depends_on:
+      - db
+
+  typesense:
+    image: typesense/typesense:27.1
+    ports:
+      - 8108:8108
+    restart: unless-stopped
+    networks:
+      - saleor-backend-tier
+    volumes:
+      - typesense-data:/data
+    command: "--data-dir /data --api-key=xyz --enable-cors"
+
 volumes:
+  gorse-data:
+  typesense-data:
   saleor-db:
     driver: local
   saleor-cache:
     driver: local
   saleor-media:
+  saleor-dynamodb:
 
 networks:
   saleor-backend-tier:
