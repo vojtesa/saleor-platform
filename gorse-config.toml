@@ -15,12 +15,12 @@ cache_size = 200
 positive_feedback_types = ["view", "like", "purchase"]
 
 [recommend.collaborative]
-type = "none"
+type = "mf"
 fit_epoch = 50
 fit_period = "5m"
 
 [recommend."item-to-item"]
-type = "tags"
+type = "users"
 
 [recommend.fallback]
 recommenders = ["latest"]
