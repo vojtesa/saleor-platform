@@ -14,21 +14,22 @@ services:
       - db
       - cache
       - jaeger
-    volumes:
-      # shared volume between worker and api for media
-      - saleor-media:/app/media
+      - minio
     env_file:
       - common.env
       - backend.env
     environment:
       - DASHBOARD_URL=http://localhost:9000/
       - ALLOWED_HOSTS=localhost,127.0.0.1,api
+      - EMAIL_URL=${EMAIL_URL:-smtp://mailpit:1025}
 
   dashboard:
     image: ghcr.io/saleor/saleor-dashboard:3.23
     ports:
       - 9000:80
     restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   db:
     image: library/postgres:15-alpine
@@ -63,12 +64,13 @@ services:
     env_file:
       - common.env
       - backend.env
+    environment:
+      - EMAIL_URL=${EMAIL_URL:-smtp://mailpit:1025}
     depends_on:
       - cache
       - mailpit
+      - minio
     volumes:
-      # shared volume between worker and api for media
-      - saleor-media:/app/media
       - ./worker-entrypoint.sh:/app/worker-entrypoint.sh:ro
       - ./promotion-watchdog.sh:/app/promotion-watchdog.sh:ro
 
@@ -132,6 +134,36 @@ services:
       - typesense-data:/data
     command: "--data-dir /data --api-key=xyz --enable-cors"
 
+  minio:
+    image: quay.io/minio/minio:latest
+    command: server /data --console-address ":9001"
+    ports:
+      - 9002:9000   # S3 API (host:9002 -> container:9000)
+      - 9003:9001   # Console UI (host:9003 -> container:9001)
+    restart: unless-stopped
+    networks:
+      - saleor-backend-tier
+    volumes:
+      - minio-data:/data
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: b8v+9Jy7Jn5bE9CY+TfJQfiHuq1fh5ZsAxP1Afi7G44=
+
+  listmonk:
+    image: listmonk/listmonk:latest
+    ports:
+      - 9001:9000
+    restart: unless-stopped
+    networks:
+      - saleor-backend-tier
+    depends_on:
+      - db
+    volumes:
+      - ./listmonk/config.toml:/listmonk/config.toml:ro
+    environment:
+      - LISTMONK_app__admin_username=admin
+      - LISTMONK_app__admin_password=admin
+
   workflow-service:
     build:
       context: ../services/workflow
@@ -161,6 +193,7 @@ services:
       - SALEOR_DASHBOARD_URL=${SALEOR_DASHBOARD_URL:-http://localhost:9000}
 
 volumes:
+  minio-data:
   workflow-data:
   gorse-data:
   typesense-data:

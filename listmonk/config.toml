@@ -1,0 +1,11 @@
+[app]
+address = "0.0.0.0:9000"
+
+# Database
+[db]
+host = "db"
+port = 5432
+user = "saleor"
+password = "saleor"
+database = "listmonk"
+ssl_mode = "disable"
