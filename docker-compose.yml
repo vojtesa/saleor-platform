@@ -132,7 +132,36 @@ services:
       - typesense-data:/data
     command: "--data-dir /data --api-key=xyz --enable-cors"
 
+  workflow-service:
+    build:
+      context: ../services/workflow
+      dockerfile: Dockerfile
+    ports:
+      - 3002:3001
+    restart: unless-stopped
+    networks:
+      - saleor-backend-tier
+    volumes:
+      - workflow-data:/data
+      - ../services/workflow/src/modules/invoices:/app/templates
+    environment:
+      - PORT=3001
+      - DATABASE_PATH=/data/workflow.db
+      - API_KEY=${WORKFLOW_API_KEY:-workflow-dev-key-change-in-production}
+      - CORS_ORIGIN=http://localhost:3000
+      - APP_BASE_URL=http://localhost:3002
+      - APP_API_BASE_URL=http://host.docker.internal:3002
+      - APP_ID=cz.vojtesa.workflow
+      - APP_NAME=Workflow objednavek
+      - FIO_API_TOKEN=${FIO_API_TOKEN:-}
+      - FIO_POLL_INTERVAL_S=${FIO_POLL_INTERVAL_S:-30}
+      - FIO_ALERT_EMAIL=${FIO_ALERT_EMAIL:-fakturace@a-green.cz}
+      - SMTP_HOST=${WORKFLOW_SMTP_HOST:-mailpit}
+      - SMTP_PORT=${WORKFLOW_SMTP_PORT:-1025}
+      - SALEOR_DASHBOARD_URL=${SALEOR_DASHBOARD_URL:-http://localhost:9000}
+
 volumes:
+  workflow-data:
   gorse-data:
   typesense-data:
   saleor-db:
