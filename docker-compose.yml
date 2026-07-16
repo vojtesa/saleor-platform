@@ -59,6 +59,8 @@ services:
     image: ghcr.io/saleor/saleor:3.23
     command: /app/worker-entrypoint.sh
     restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - saleor-backend-tier
     env_file:
@@ -184,7 +186,7 @@ services:
       - APP_BASE_URL=http://localhost:3002
       - APP_API_BASE_URL=http://host.docker.internal:3002
       - APP_ID=cz.vojtesa.workflow
-      - APP_NAME=Workflow objednavek
+      - APP_NAME=Rezervace + workflow objednavek
       - FIO_API_TOKEN=${FIO_API_TOKEN:-}
       - FIO_POLL_INTERVAL_S=${FIO_POLL_INTERVAL_S:-30}
       - FIO_ALERT_EMAIL=${FIO_ALERT_EMAIL:-fakturace@a-green.cz}
