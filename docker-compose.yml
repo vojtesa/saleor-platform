@@ -192,6 +192,7 @@ services:
       - FIO_ALERT_EMAIL=${FIO_ALERT_EMAIL:-fakturace@a-green.cz}
       - SMTP_HOST=${WORKFLOW_SMTP_HOST:-mailpit}
       - SMTP_PORT=${WORKFLOW_SMTP_PORT:-1025}
+      - NOTIFICATION_EMAIL=${NOTIFICATION_EMAIL:-eshop@a-green.cz}
       - SALEOR_DASHBOARD_URL=${SALEOR_DASHBOARD_URL:-http://localhost:9000}
 
 volumes:
