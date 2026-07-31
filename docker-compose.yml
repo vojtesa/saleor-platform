@@ -22,6 +22,8 @@ services:
       - DASHBOARD_URL=http://localhost:9000/
       - ALLOWED_HOSTS=localhost,127.0.0.1,api
       - EMAIL_URL=${EMAIL_URL:-smtp://mailpit:1025}
+    volumes:
+      - saleor-media:/app/media
 
   dashboard:
     image: ghcr.io/saleor/saleor-dashboard:3.23
@@ -75,6 +77,7 @@ services:
     volumes:
       - ./worker-entrypoint.sh:/app/worker-entrypoint.sh:ro
       - ./promotion-watchdog.sh:/app/promotion-watchdog.sh:ro
+      - saleor-media:/app/media
 
   jaeger:
     image: jaegertracing/jaeger
@@ -166,6 +169,32 @@ services:
       - LISTMONK_app__admin_username=admin
       - LISTMONK_app__admin_password=admin
 
+  comgate:
+    build:
+      context: ../deploy_a-green
+      dockerfile: Dockerfile.comgate
+    ports:
+      - 3003:3003
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - saleor-backend-tier
+    volumes:
+      - ../deploy_a-green/comgate-app/data:/data
+    environment:
+      - NODE_ENV=development
+      - HOSTNAME=0.0.0.0
+      - PORT=3003
+      - APL_FILE_PATH=/data/comgate-apl.json
+      - APP_BASE_URL=http://host.docker.internal:3003
+      - APP_BROWSER_URL=http://localhost:3003
+      - SECRET_KEY=${COMGATE_SECRET_KEY:-72416311dad0aab4bba64ed08becc59203de836ab38f1e26be5342024f38218e}
+      - COMGATE_MERCHANT=${COMGATE_MERCHANT:-516241}
+      - COMGATE_SECRET=${COMGATE_SECRET:-Ktf6atp4EEcRjqttHDJFiplGusjJJ2LG}
+      - COMGATE_TEST=${COMGATE_TEST:-1}
+      - APP_ID=cz.vojtesa.comgate-local
+
   workflow-service:
     build:
       context: ../services/workflow
@@ -197,6 +226,7 @@ services:
 
 volumes:
   minio-data:
+  saleor-media:
   workflow-data:
   gorse-data:
   typesense-data:
@@ -204,8 +234,8 @@ volumes:
     driver: local
   saleor-cache:
     driver: local
-  saleor-media:
   saleor-dynamodb:
+  comgate-data:
 
 networks:
   saleor-backend-tier:
