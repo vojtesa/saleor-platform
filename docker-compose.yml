@@ -189,6 +189,8 @@ services:
       - APL_FILE_PATH=/data/comgate-apl.json
       - APP_BASE_URL=http://host.docker.internal:3003
       - APP_BROWSER_URL=http://localhost:3003
+      - SALEOR_API_URL=http://api:8000/graphql/
+      - SYNC_WEBHOOK_URL=http://workflow-service:3001/api/webhooks
       - SECRET_KEY=${COMGATE_SECRET_KEY:-72416311dad0aab4bba64ed08becc59203de836ab38f1e26be5342024f38218e}
       - COMGATE_MERCHANT=${COMGATE_MERCHANT:-516241}
       - COMGATE_SECRET=${COMGATE_SECRET:-Ktf6atp4EEcRjqttHDJFiplGusjJJ2LG}
