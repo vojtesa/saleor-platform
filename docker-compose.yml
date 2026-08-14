@@ -26,12 +26,14 @@ services:
       - saleor-media:/app/media
 
   dashboard:
-    image: ghcr.io/saleor/saleor-dashboard:3.23
+    image: saleor-dashboard:local
     ports:
       - 9000:80
     restart: unless-stopped
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    environment:
+      - LOCALE_CODE=CS
 
   db:
     image: library/postgres:15-alpine
@@ -199,7 +201,7 @@ services:
 
   workflow-service:
     build:
-      context: ../services/workflow
+      context: ../custom-services
       dockerfile: Dockerfile
     ports:
       - 3002:3001
@@ -208,7 +210,7 @@ services:
       - saleor-backend-tier
     volumes:
       - workflow-data:/data
-      - ../services/workflow/src/modules/invoices:/app/templates
+      - ../custom-services/src/modules/invoices:/app/templates
     environment:
       - PORT=3001
       - DATABASE_PATH=/data/workflow.db
@@ -221,10 +223,21 @@ services:
       - FIO_API_TOKEN=${FIO_API_TOKEN:-}
       - FIO_POLL_INTERVAL_S=${FIO_POLL_INTERVAL_S:-30}
       - FIO_ALERT_EMAIL=${FIO_ALERT_EMAIL:-fakturace@a-green.cz}
-      - SMTP_HOST=${WORKFLOW_SMTP_HOST:-mailpit}
-      - SMTP_PORT=${WORKFLOW_SMTP_PORT:-1025}
+      - SMTP_HOST=${WORKFLOW_SMTP_HOST:-smtp.seznam.cz}
+      - SMTP_PORT=${WORKFLOW_SMTP_PORT:-465}
+      - SMTP_SECURE=${WORKFLOW_SMTP_SECURE:-true}
+      - SMTP_USER=${WORKFLOW_SMTP_USER:-noreply@a-green.cz}
+      - SMTP_PASS=${WORKFLOW_SMTP_PASS:-kekSi0-pofmoz-poghok}
+      - EMAIL_FROM=${WORKFLOW_EMAIL_FROM:-noreply@a-green.cz}
       - NOTIFICATION_EMAIL=${NOTIFICATION_EMAIL:-eshop@a-green.cz}
       - SALEOR_DASHBOARD_URL=${SALEOR_DASHBOARD_URL:-http://localhost:9000}
+      - STOREFRONT_URL=${STOREFRONT_URL:-http://localhost:3000}
+      - LISTMONK_URL=${LISTMONK_URL:-http://listmonk:9000/api}
+      - LISTMONK_USER=${LISTMONK_USER:-admin_api}
+      - LISTMONK_TOKEN=${LISTMONK_TOKEN:-a-green-dev-token-2026}
+      - EMAIL_WEBHOOK_SECRET=${EMAIL_WEBHOOK_SECRET:-}
+      - PICKUP_ADDRESS=${PICKUP_ADDRESS:-A-green s.r.o., Bubeníčkova 4368/9, 615 00 Brno}
+      - PAYMENT_BANK_ACCOUNT=${PAYMENT_BANK_ACCOUNT:-}
 
 volumes:
   minio-data:
