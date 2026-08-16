@@ -36,4 +36,4 @@ fi
 
 echo ""
 echo "Hotovo. Zkontroluj: curl -s https://www.local.a-green.cz -o /dev/null -w '%{http_code}'"
-echo "Caddy spustíš: make proxy (nebo caddy run --config Caddyfile)"
+echo "Stack + HTTPS proxy spustíš: make up (Caddy jede jako compose služba)"
