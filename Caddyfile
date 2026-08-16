@@ -1,31 +1,28 @@
-# Lokální HTTPS reverse proxy pro dev stack (mkcert certifikáty).
+# Lokální HTTPS reverse proxy (běží jako docker compose služba `caddy`).
 # Domény local.a-green.cz existují JEN v /etc/hosts (127.0.0.1) — nejsou
-# v žádném veřejném DNS. Bind na 127.0.0.1 = z LANu se na dev stack nedostane.
-# Certifikáty: scripts/setup-local-https.sh
+# v žádném veřejném DNS. Porty 443/80 jsou v compose publikované jen na
+# 127.0.0.1 = z LANu se na dev stack nedostane.
+# Certifikáty: scripts/setup-local-https.sh (mkcert, mount ./certs)
 {
 	admin off
 }
 
 www.local.a-green.cz {
-	bind 127.0.0.1
-	tls certs/_wildcard.local.a-green.cz.pem certs/_wildcard.local.a-green.cz-key.pem
-	reverse_proxy 127.0.0.1:3000 # frontend (pnpm dev)
+	tls /certs/_wildcard.local.a-green.cz.pem /certs/_wildcard.local.a-green.cz-key.pem
+	reverse_proxy host.docker.internal:3000 # frontend (pnpm dev na hostu)
 }
 
 api.local.a-green.cz {
-	bind 127.0.0.1
-	tls certs/_wildcard.local.a-green.cz.pem certs/_wildcard.local.a-green.cz-key.pem
-	reverse_proxy 127.0.0.1:8000 # Saleor API (docker compose)
+	tls /certs/_wildcard.local.a-green.cz.pem /certs/_wildcard.local.a-green.cz-key.pem
+	reverse_proxy api:8000 # Saleor API (docker compose)
 }
 
 workflow.local.a-green.cz {
-	bind 127.0.0.1
-	tls certs/_wildcard.local.a-green.cz.pem certs/_wildcard.local.a-green.cz-key.pem
-	reverse_proxy 127.0.0.1:3002 # workflow-service (docker compose)
+	tls /certs/_wildcard.local.a-green.cz.pem /certs/_wildcard.local.a-green.cz-key.pem
+	reverse_proxy workflow-service:3001 # workflow-service (docker compose)
 }
 
 dashboard.local.a-green.cz {
-	bind 127.0.0.1
-	tls certs/_wildcard.local.a-green.cz.pem certs/_wildcard.local.a-green.cz-key.pem
-	reverse_proxy 127.0.0.1:9000 # Saleor dashboard (docker compose)
+	tls /certs/_wildcard.local.a-green.cz.pem /certs/_wildcard.local.a-green.cz-key.pem
+	reverse_proxy dashboard:80 # Saleor dashboard (docker compose)
 }

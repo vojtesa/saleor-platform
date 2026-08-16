@@ -36,6 +36,21 @@ services:
       - LOCALE_CODE=CS
       - API_URL=https://api.local.a-green.cz/graphql/
 
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - 127.0.0.1:443:443
+      - 127.0.0.1:80:80
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./certs:/certs:ro
+    restart: unless-stopped
+    networks:
+      - saleor-backend-tier
+      - default
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
   db:
     image: library/postgres:15-alpine
     ports:

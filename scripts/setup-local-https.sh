@@ -9,14 +9,12 @@ set -euo pipefail
 HOSTS_ENTRY="127.0.0.1 www.local.a-green.cz api.local.a-green.cz workflow.local.a-green.cz dashboard.local.a-green.cz"
 
 command -v mkcert >/dev/null || { echo "mkcert není nainstalované (brew install mkcert)"; exit 1; }
-command -v caddy >/dev/null || { echo "caddy není nainstalované (brew install caddy)"; exit 1; }
 
 cd "$(dirname "$0")/.."
 mkdir -p certs
 
-# Caddy potřebuje port 443 — bez rootu přes capability (jednorázový sudo)
-sudo setcap cap_net_bind_service=+ep "$(command -v caddy)" 2>/dev/null \
-  || echo "POZOR: setcap se nepovedl — Caddy na 443 spustíš jen s rootem (spusť to ručně)"
+# Caddy běží jako docker compose služba — porty 443/80 binduje docker daemon
+# (root), takže na hostu žádné setcap není potřeba.
 
 # CA do systémového trust storu (nss pro Firefox, systém pro Chromium/curl)
 mkcert -install
