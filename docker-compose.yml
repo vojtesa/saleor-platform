@@ -101,7 +101,7 @@ services:
     image: jaegertracing/jaeger
     ports:
       - 127.0.0.1:16686:16686
-      - "4317:4317"
+      - 127.0.0.1:4317:4317
       - 127.0.0.1:4318:4318
     restart: unless-stopped
     networks:
