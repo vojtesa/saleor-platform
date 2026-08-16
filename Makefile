@@ -5,8 +5,8 @@
 https: ## jednorázové nastavení mkcert certů + /etc/hosts
 	./scripts/setup-local-https.sh
 
-proxy: ## spustit Caddy (HTTPS na local.a-green.cz)
-	caddy run --config Caddyfile
+proxy: ## spustit Caddy na pozadí (HTTPS na local.a-green.cz)
+	caddy start --config Caddyfile
 
 stack: ## spustit Saleor dev stack (docker compose)
 	docker compose up -d
