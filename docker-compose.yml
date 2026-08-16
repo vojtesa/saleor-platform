@@ -2,7 +2,7 @@ services:
   api:
     image: ghcr.io/saleor/saleor:3.23
     ports:
-      - 8000:8000
+      - 127.0.0.1:8000:8000
     restart: unless-stopped
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -19,8 +19,8 @@ services:
       - common.env
       - backend.env
     environment:
-      - DASHBOARD_URL=http://localhost:9000/
-      - ALLOWED_HOSTS=localhost,127.0.0.1,api
+      - DASHBOARD_URL=https://dashboard.local.a-green.cz
+      - ALLOWED_HOSTS=localhost,127.0.0.1,api,api.local.a-green.cz
       - EMAIL_URL=${EMAIL_URL:-smtp://mailpit:1025}
     volumes:
       - saleor-media:/app/media
@@ -28,17 +28,18 @@ services:
   dashboard:
     image: saleor-dashboard:local
     ports:
-      - 9000:80
+      - 127.0.0.1:9000:80
     restart: unless-stopped
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
       - LOCALE_CODE=CS
+      - API_URL=https://api.local.a-green.cz/graphql/
 
   db:
     image: library/postgres:15-alpine
     ports:
-      - 5432:5432
+      - 127.0.0.1:5432:5432
     restart: unless-stopped
     networks:
       - saleor-backend-tier
@@ -52,7 +53,7 @@ services:
   cache:
     image: valkey/valkey:8.1-alpine
     ports:
-      - 6379:6379
+      - 127.0.0.1:6379:6379
     restart: unless-stopped
     networks:
       - saleor-backend-tier
@@ -84,9 +85,9 @@ services:
   jaeger:
     image: jaegertracing/jaeger
     ports:
-      - "16686:16686"
+      - 127.0.0.1:16686:16686
       - "4317:4317"
-      - "4318:4318"
+      - 127.0.0.1:4318:4318
     restart: unless-stopped
     networks:
       - saleor-backend-tier
@@ -97,8 +98,8 @@ services:
   mailpit:
     image: axllent/mailpit
     ports:
-      - 1025:1025 # smtp server
-      - 8025:8025 # web ui. Visit http://localhost:8025/ to check emails
+      - 127.0.0.1:1025:1025 # smtp server
+      - 127.0.0.1:8025:8025 # web ui. Visit http://localhost:8025/ to check emails
     restart: unless-stopped
     networks:
       - saleor-backend-tier
@@ -106,7 +107,7 @@ services:
   dynamodb:
     image: amazon/dynamodb-local:latest
     ports:
-      - 8005:8000
+      - 127.0.0.1:8005:8000
     restart: unless-stopped
     networks:
       - saleor-backend-tier
@@ -117,7 +118,7 @@ services:
   gorse:
     image: zhenghaoz/gorse-in-one:latest
     ports:
-      - 8088:8088
+      - 127.0.0.1:8088:8088
     restart: unless-stopped
     networks:
       - saleor-backend-tier
@@ -133,7 +134,7 @@ services:
   typesense:
     image: typesense/typesense:27.1
     ports:
-      - 8108:8108
+      - 127.0.0.1:8108:8108
     restart: unless-stopped
     networks:
       - saleor-backend-tier
@@ -145,8 +146,8 @@ services:
     image: quay.io/minio/minio:latest
     command: server /data --console-address ":9001"
     ports:
-      - 9002:9000   # S3 API (host:9002 -> container:9000)
-      - 9003:9001   # Console UI (host:9003 -> container:9001)
+      - 127.0.0.1:9002:9000   # S3 API (host:9002 -> container:9000)
+      - 127.0.0.1:9003:9001   # Console UI (host:9003 -> container:9001)
     restart: unless-stopped
     networks:
       - saleor-backend-tier
@@ -159,7 +160,7 @@ services:
   listmonk:
     image: listmonk/listmonk:latest
     ports:
-      - 9001:9000
+      - 127.0.0.1:9001:9000
     restart: unless-stopped
     networks:
       - saleor-backend-tier
@@ -176,7 +177,7 @@ services:
       context: ../deploy_a-green
       dockerfile: Dockerfile.comgate
     ports:
-      - 3003:3003
+      - 127.0.0.1:3003:3003
     restart: unless-stopped
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -204,7 +205,7 @@ services:
       context: ../custom-services
       dockerfile: Dockerfile
     ports:
-      - 3002:3001
+      - 127.0.0.1:3002:3001
     restart: unless-stopped
     networks:
       - saleor-backend-tier
@@ -216,7 +217,7 @@ services:
       - DATABASE_PATH=/data/workflow.db
       - API_KEY=${WORKFLOW_API_KEY:-workflow-dev-key-change-in-production}
       - CORS_ORIGIN=http://localhost:3000
-      - APP_BASE_URL=http://localhost:3002
+      - APP_BASE_URL=https://workflow.local.a-green.cz
       - APP_API_BASE_URL=http://host.docker.internal:3002
       - APP_ID=cz.vojtesa.workflow
       - APP_NAME=Rezervace + workflow objednavek
