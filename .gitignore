@@ -1,2 +1,4 @@
 .idea
-.envcerts/
+.env
+.env.local
+certs/

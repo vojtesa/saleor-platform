@@ -9,6 +9,17 @@
 
 www.local.a-green.cz {
 	tls /certs/_wildcard.local.a-green.cz.pem /certs/_wildcard.local.a-green.cz-key.pem
+
+	# Média — stejný vzor jako produkce (Traefik: a-green.cz/media/* →
+	# stripPrefix /media → minio). Saleor staví URL médií jako
+	# https://www.local.a-green.cz/media/saleor-media/… (backend.env:
+	# AWS_MEDIA_CUSTOM_DOMAIN) — zde odebereme prefix /media a jdeme
+	# path-style do MinIO: /saleor-media/<objekt> = bucket `saleor-media`.
+	handle /media/* {
+		uri strip_prefix /media
+		reverse_proxy minio:9000
+	}
+
 	reverse_proxy host.docker.internal:3000 # frontend (pnpm dev na hostu)
 }
 
