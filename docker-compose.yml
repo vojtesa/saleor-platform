@@ -254,6 +254,8 @@ services:
       - EMAIL_WEBHOOK_SECRET=${EMAIL_WEBHOOK_SECRET:-}
       - PICKUP_ADDRESS=${PICKUP_ADDRESS:-A-green s.r.o., Bubeníčkova 4368/9, 615 00 Brno}
       - PAYMENT_BANK_ACCOUNT=${PAYMENT_BANK_ACCOUNT:-}
+      - PAYMENT_BANK_IBAN=${PAYMENT_BANK_IBAN:-}
+      - EMAIL_PUBLIC_BASE_URL=${EMAIL_PUBLIC_BASE_URL:-https://workflow.local.a-green.cz}
 
 volumes:
   minio-data:
