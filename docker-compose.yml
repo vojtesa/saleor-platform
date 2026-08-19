@@ -79,6 +79,12 @@ services:
     image: ghcr.io/saleor/saleor:3.23
     command: /app/worker-entrypoint.sh
     restart: unless-stopped
+    # Bez stropu si worker vezme celý stroj: failující webhooky se opakují,
+    # Celery si retry úlohy drží v paměti a vyhladoví api i db (2026-08-19:
+    # import 1200 produktů → 12k nedoručitelných zpráv → 358 % CPU, 5 GiB,
+    # API přestala odpovídat). S limity z toho je nanejvýš pomalejší sync.
+    cpus: 4.0
+    mem_limit: 4g
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
@@ -254,6 +260,8 @@ services:
       - EMAIL_WEBHOOK_SECRET=${EMAIL_WEBHOOK_SECRET:-}
       - PICKUP_ADDRESS=${PICKUP_ADDRESS:-A-green s.r.o., Bubeníčkova 4368/9, 615 00 Brno}
       - PAYMENT_BANK_ACCOUNT=${PAYMENT_BANK_ACCOUNT:-}
+      - PAYMENT_BANK_IBAN=${PAYMENT_BANK_IBAN:-}
+      - EMAIL_PUBLIC_BASE_URL=${EMAIL_PUBLIC_BASE_URL:-https://workflow.local.a-green.cz}
 
 volumes:
   minio-data:
