@@ -21,6 +21,7 @@ services:
     environment:
       - DASHBOARD_URL=https://dashboard.local.a-green.cz
       - ALLOWED_HOSTS=localhost,127.0.0.1,api,api.local.a-green.cz
+      - ALLOWED_CLIENT_HOSTS=localhost,127.0.0.1,www.local.a-green.cz,api.local.a-green.cz
       - EMAIL_URL=${EMAIL_URL:-smtp://mailpit:1025}
     volumes:
       - saleor-media:/app/media
